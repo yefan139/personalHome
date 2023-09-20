@@ -55,6 +55,7 @@
 *::after {
   box-sizing: border-box;
   margin: 0;
+  padding: 0;
   font-weight: normal;
 }
 
@@ -70,4 +71,55 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+em,i {
+    font-style: normal
+}
+
+li {
+    list-style: none;
+}
+
+img {
+    border: 0;
+    vertical-align: middle
+}
+
+a {
+    text-decoration: none
+}
+
+/* 在线链接服务仅供平台体验和调试使用，平台不承诺服务的稳定性，企业客户需下载字体包自行发布使用并做好备份。 */
+@font-face {
+    font-family: 'iconfont';  /* Project id 1985912 */
+    src: url('//at.alicdn.com/t/c/font_1985912_jespmloluhc.woff2?t=1695094941973') format('woff2'),
+         url('//at.alicdn.com/t/c/font_1985912_jespmloluhc.woff?t=1695094941973') format('woff'),
+         url('//at.alicdn.com/t/c/font_1985912_jespmloluhc.ttf?t=1695094941973') format('truetype');
+  }
+
+.iconfont {
+  font-family: "iconfont" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-home::before {
+    content: "\e7e1";
+}
+
+.icon-email::before {
+    content: "\e615";
+}
+
+.icon-message::before {
+    content: "\e7e8";
+}
+.icon-like::before {
+    content: "\e65b";
+}
+.icon-profile::before {
+    content: "\e7f6";
 }

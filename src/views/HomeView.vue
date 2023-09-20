@@ -1,11 +1,64 @@
 <script setup lang="ts">
+    import {reactive, ref} from 'vue';
+    import {useRouter} from 'vue-router';
+    import type {navType} from './interface';
+    const router = useRouter();
     const assetsUrl = window.assetsUrl;
     const url = `${assetsUrl}/avatar.jpg`;
+    const hoverAcitveIndex = ref(0);
+    const curAcitveIndex = ref(0);
+    const navList = reactive<navType[]>([
+        {
+            name: 'Home',
+            path: "homeCenter",
+            icon: 'icon-home',
+            bg: "daniel-cross-the-road.jpg"
+        },
+        {
+            name: 'Email',
+            path: "homeCenter",
+            icon: 'icon-email',
+            bg: "daniel-one-person-journey.jpg"
+        },
+        {
+            name: 'Message',
+            path: "homeCenter",
+            icon: 'icon-message',
+            bg: "lukasz-sea.jpg"
+        },
+        {
+            name: 'Like',
+            path: "homeCenter",
+            icon: 'icon-like',
+            bg: "eric-coffee.jpg"
+        },
+        {
+            name: 'Profile',
+            path: "profile",
+            icon: 'icon-profile',
+            bg: "daniele-paddy.jpg"
+        }
+    ]);
+
+    // 鼠标进入nav
+    const mouseenterNav = (num: number) => {
+        hoverAcitveIndex.value = num;
+    };
+    // 鼠标移出nav
+    const mouseleaveNav = () => {
+        hoverAcitveIndex.value = curAcitveIndex.value;
+    };
+    // 点击nav
+    const handleNav = (num: number, row: navType) => {
+        hoverAcitveIndex.value = num;
+        curAcitveIndex.value = num;
+        router.push(`/home/${row.path}`)
+    };
 </script>
 
 <template>
     <div class="full_page">
-        <div class="head_box" :style="{background: `transparent url(${assetsUrl}/spaceBg.jpg) repeat center`}">
+        <div class="head_box" :style="{background: `transparent url(${assetsUrl}/spaceBg.jpg) repeat center`, backgroundSize: 'cover'}">
             <div class="avatar_box">
                 <div class="img_box">
                     <el-image style="width: 100%; height: 100%" :src="url" fit="fill" />
@@ -16,7 +69,28 @@
                 <div class="fence"></div>
                 <div class="signature_cont">***个人空间</div>
             </div>
+            <ul class="nav-center" @mouseleave="() => mouseleaveNav()">
+                <li v-for="(item, index) in navList" :key="item.name" @mouseenter="() => mouseenterNav(index)" @click="() => handleNav(index, item)" :class="[index === hoverAcitveIndex && 'active']">
+                    <i :class="['iconfont', item.icon]"></i><span :class="[`${item.icon}-name`]">{{item.name}}</span>
+                </li>
+                <div class="indicator" :style="{transform: `translateX(calc(70px * ${hoverAcitveIndex} + 5px))`}">
+                    <div class="indicator-before"></div>
+                    <div class="indicator-content"></div>
+                    <div class="indicator-after"></div>
+                </div>
+            </ul>
         </div>
+        <div
+            class="banner"
+            v-for="(item, index) in navList"
+            :key="item.name"
+            :style="{
+                background: `transparent url(${assetsUrl}/${item.bg}) no-repeat center`,
+                backgroundSize: '100% 100%',
+                display: index === curAcitveIndex ? 'block' : 'none'
+            }"
+        ></div>
+        <RouterView />
     </div>
 </template>
 
@@ -69,5 +143,98 @@
         font-size: 14px;
         line-height: 24px;
         color: rgb(119, 119, 119);
+    }
+    
+    .nav-center {
+        width: 400px;
+        height: 70px;
+        margin-top: 35px;
+        padding: 0 25px;
+        border-radius: 10px;
+        background-color: #94c4ef;
+        position: relative;
+        display: flex;
+    }
+    .nav-center li {
+        width: 70px;
+        height: 70px;
+        z-index: 3;
+        color: #fff;
+        position: relative;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    .nav-center li i {
+        display: block;
+        height: 70px;
+        line-height: 70px;
+        font-size: 24px;
+        text-align: center;
+        position: relative;
+        transition: all 0.5s;
+    }
+    .nav-center li span {
+        position: absolute;
+        font-size: 12px;
+        letter-spacing: 2px;
+        transition: all 0.5s;
+        transform: translateY(20px);
+    }
+    .nav-center li.active i {
+        transform: translateY(-35px);
+        color: #fff;
+    }
+    .nav-center li.active .icon-like, .nav-center li.active .icon-like-name {
+        color: rgb(247, 141, 158);
+    }
+    .nav-center li.active span {
+        opacity: 1;
+        transform: translateY(10px);
+    }
+    .indicator {
+        position: absolute;
+        top: -43%;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        transition: all 0.5s;
+    }
+    .indicator-content {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #2196f3;
+        border-radius: 50%;
+        border: 6px solid #fff;
+        z-index: 2;
+    }
+    .indicator-before {
+        position: absolute;
+        top: 50%;
+        left: -16px;
+        width: 20px;
+        height: 20px;
+        background-color: #94c4ef;
+        border-top-right-radius: 20px;
+        box-shadow: 1px -10px 0 0 #fff;
+    }
+    .indicator-after {
+        position: absolute;
+        top: 50%;
+        right: -16px;
+        width: 20px;
+        height: 20px;
+        background-color: #94c4ef;
+        border-top-left-radius: 20px;
+        box-shadow: -1px -10px 0 0 #fff;
+    }
+
+    .banner {
+        height: 460px;
     }
 </style>
