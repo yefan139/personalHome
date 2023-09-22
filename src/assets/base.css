@@ -123,3 +123,19 @@ a {
 .icon-profile::before {
     content: "\e7f6";
 }
+.icon-up_to_top::before {
+    content: "\e663";
+}
+
+.hidden_ellipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.two_hidden_ellipsis {
+  display: -webkit-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}

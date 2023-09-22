@@ -1,44 +1,68 @@
 <script setup lang="ts">
-    import {reactive, ref} from 'vue';
-    import {useRouter} from 'vue-router';
-    import type {navType} from './interface';
-    const router = useRouter();
+    import {reactive, ref, watch} from 'vue';
+    import {useRoute, useRouter, type RouteLocationNormalized} from 'vue-router';
+    import type {navType} from './type/interface';
+
     const assetsUrl = window.assetsUrl;
-    const url = `${assetsUrl}/avatar.jpg`;
-    const hoverAcitveIndex = ref(0);
-    const curAcitveIndex = ref(0);
+    const router = useRouter();
+    const route = useRoute();
+
+    const url = `${assetsUrl}/avatar.jpg`; // 顶部导航背景图
+    const hoverAcitveIndex = ref(0); // 鼠标移动到导航的下标
+    const curAcitveIndex = ref(0); // 导航当前选中的下标
+    // 导航列表信息
     const navList = reactive<navType[]>([
         {
             name: 'Home',
-            path: "homeCenter",
+            path: "/home/homeCenter",
             icon: 'icon-home',
             bg: "daniel-cross-the-road.jpg"
         },
         {
             name: 'Email',
-            path: "homeCenter",
+            path: "/home/email",
             icon: 'icon-email',
             bg: "daniel-one-person-journey.jpg"
         },
         {
             name: 'Message',
-            path: "homeCenter",
+            path: "/home/message",
             icon: 'icon-message',
             bg: "lukasz-sea.jpg"
         },
         {
             name: 'Like',
-            path: "homeCenter",
+            path: "/home/like",
             icon: 'icon-like',
             bg: "eric-coffee.jpg"
         },
         {
             name: 'Profile',
-            path: "profile",
+            path: "/home/profile",
             icon: 'icon-profile',
             bg: "daniele-paddy.jpg"
         }
     ]);
+    
+    // 路径变化设置菜单选择状态
+    const setActiveIndex = (routeObj: RouteLocationNormalized) => {
+        navList.some((item, index) => {
+            if (item.path === routeObj.path) {
+                hoverAcitveIndex.value = index;
+                curAcitveIndex.value = index;
+                return true;
+            }
+            return false;
+        })
+    }
+
+    // 初始加载设置菜单选择状态
+    setActiveIndex(route);
+
+    // 监听路由变化
+    watch(route, (newRoute) => {
+        setActiveIndex(newRoute);
+    })
 
     // 鼠标进入nav
     const mouseenterNav = (num: number) => {
@@ -52,7 +76,7 @@
     const handleNav = (num: number, row: navType) => {
         hoverAcitveIndex.value = num;
         curAcitveIndex.value = num;
-        router.push(`/home/${row.path}`)
+        router.push(row.path)
     };
 </script>
 
@@ -91,6 +115,7 @@
             }"
         ></div>
         <RouterView />
+        <div style="height: 100px; background: #94c4ef;"></div>
     </div>
 </template>
 
