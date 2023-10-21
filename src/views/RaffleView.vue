@@ -195,7 +195,7 @@
     // 取球方式变化
     const raffleWayChange = (value: string) => {
         raffleWay.value = value;
-        configChange();
+        // configChange();
     };
 
     // 清空结果
