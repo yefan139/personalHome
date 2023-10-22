@@ -34,8 +34,8 @@ window.addEventListener("scroll", () => {
 <style scoped>
     .back-to-top {
         position: fixed;
-        right: 60px;
-        bottom: 100px;
+        right: 5%;
+        bottom: 10%;
         width: 40px;
         height: 40px;
         font-size: 30px;

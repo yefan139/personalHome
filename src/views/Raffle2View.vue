@@ -1,5 +1,5 @@
 <template>
-    <div class="raffle-view">
+    <div class="playing-cards">
         <div class="config-item" v-for="item in ballInfoViewList" :key="item.id">
             <div class="config-label">
                 <span :style="{color: item.fontColor}">{{item.ballName}}</span>{{item.label}}
@@ -14,42 +14,16 @@
                 />
             </div>
         </div>
-        <div class="config-item">
-            <el-radio-group v-model="raffleType" @change="raffleTypeChange">
-                <el-radio label="1">正常抽选</el-radio>
-                <el-radio label="2">快速抽选</el-radio>
-            </el-radio-group>
+        <div class="config-item" v-if="isShuffleFlag">
+            <el-button type="primary" @click="stopShuffle">停止洗牌</el-button>
+        </div>
+        <div class="config-item" v-else>
+            <el-button type="primary" link @click="cleanCurSelectArr" v-if="selectedNumberArr.length > 0">清空此轮选择</el-button>
+            <el-button type="primary" @click="startShuffle" :disabled="!showCards">开始洗牌</el-button>
+            <el-button type="primary" @click="closeCards">{{ showCards ? "关闭选择" : "打开选择"}}</el-button>
         </div>
         <div class="config-item">
-            <el-radio-group v-model="raffleWay" @change="raffleWayChange">
-                <el-radio label="1">中间抽取</el-radio>
-                <el-radio label="2">随机抽取</el-radio>
-            </el-radio-group>
-        </div>
-        <div class="config-item">
-            <template v-for="(item, i) in curShuffleArr" :key="i">
-                <div :class="['circleall_1lvti', selectBlueFlag ? 'blue_ball' : 'red_ball', curShuffleIndex === i ? 'yellow_ball' : '']">
-                    <span class="number_2xOZd">
-                        {{item}}
-                    </span>
-                </div>
-            </template>
-        </div>
-        <template v-if="raffleType == '1'">
-            <div class="config-item" v-if="isShuffleFlag">
-                <el-button type="primary" @click="selectBall">选球</el-button>
-            </div>
-            <div class="config-item" v-else>
-                <el-button type="primary" @click="startShuffle">开始旋转</el-button>
-            </div>
-        </template>
-        <template v-else-if="raffleType == '2'">
-            <div class="config-item">
-                <el-button type="primary" @click="quickExtraction">点击生成</el-button>
-            </div>
-        </template>
-        <div class="config-item">
-            <div class="content-mt_MYG2H">
+            <div class="content-curlist">
                 <template v-for="(item, i) in selectedNumberArr" :key="i">
                     <div :class="['circleall_1lvti', i < ballConfigInfoValue.redSeveralInput ? 'red_ball' : 'blue_ball']">
                         <span class="number_2xOZd">
@@ -58,6 +32,28 @@
                     </div>
                 </template>
             </div>
+        </div>
+        <div class="cards-box" v-if="showCards" v-loading="isShuffleFlag">
+            <template v-if="selectBlueFlag">
+                <div
+                    :class="['card-item', 'blue_ball', curSelectBlueArr.includes(item) ? 'active' : '']"
+                    v-for="(item, i) in curShuffleArr"
+                    :key="i"
+                    @click="() => selectCards(item)"
+                >
+                    {{curSelectBlueArr.includes(item) ? item : ""}}
+                </div>
+            </template>
+            <template v-else>
+                <div
+                    :class="['card-item', 'red_ball', curSelectRedArr.includes(item) ? 'active' : '']"
+                    v-for="(item, i) in curShuffleArr"
+                    :key="i"
+                    @click="() => selectCards(item)"
+                >
+                    {{curSelectRedArr.includes(item) ? item : ""}}
+                </div>
+            </template>
         </div>
         <div class="config-item">
             <el-button type="primary" link @click="cleanViewFindlyArr">清空结果</el-button> 抽选结果(时间↓)：
@@ -132,8 +128,14 @@
 
     // 是否正在洗牌
     const isShuffleFlag = ref(false);
+    // 是否显示牌
+    const showCards = ref(true);
     // 当前轮次的抽球范围及球号
-    let curShuffleArr = ref<ballArrType>([]);
+    const curShuffleArr = ref<ballArrType>([]);
+    // 当前轮次抽取的红球
+    const curSelectRedArr = ref<ballArrType>([]);
+    // 当前轮次抽取的蓝球
+    const curSelectBlueArr = ref<ballArrType>([]);
     // 当前取出的球索引下标
     const curShuffleIndex = ref<null | number>(null);
     // 抽选出的球
@@ -197,11 +199,21 @@
         raffleWay.value = value;
         // configChange();
     };
+    // 切换选择牌
+    const closeCards = () => {
+        showCards.value = !showCards.value;
+    };
 
+    // 清空当前轮次选择的球
+    const cleanCurSelectArr = () => {
+        curSelectRedArr.value = [];
+        curSelectBlueArr.value = [];
+        selectedNumberArr = [];
+    };
     // 清空结果
     const cleanViewFindlyArr = () => {
         viewFindlyArr.value = [];
-    }
+    };
 
     // 处理即将抽选的范围及球号
     const handleBallArr = () => {
@@ -229,6 +241,8 @@
             // 上一轮的抽选结束 或 才刚开始抽选，都把已选的球容器清空
             selectedNumberArr = [];
             handleBallArr();
+            curSelectRedArr.value = [];
+            curSelectBlueArr.value = [];
             curShuffleArr.value = [...redArr];
             selectBlueFlag.value = false;
         } else if (selectedNumberArr.length === Number(ballConfigInfoValue.redSeveralInput)) {
@@ -236,10 +250,13 @@
             handleBallArr();
             curShuffleArr.value = [...blueArr];
             selectBlueFlag.value = true;
+        } else if (selectBlueFlag.value) {
+            // 当前抽选蓝球阶段，把已选的蓝球球从容器中去掉
+            curShuffleArr.value = curShuffleArr.value.filter((el) => !curSelectBlueArr.value.includes(el));
         } else {
-            curShuffleArr.value.splice(curShuffleIndex.value!, 1);
+            // 当前抽选红球阶段，把已选的红球球从容器中去掉
+            curShuffleArr.value = curShuffleArr.value.filter((el) => !curSelectRedArr.value.includes(el));
         }
-        curShuffleIndex.value = null;
 
         // 其它情况还继续使用curShuffleArr容器现有的球，不做处理
         curShuffleArr.value = _.shuffle(curShuffleArr.value);
@@ -258,28 +275,49 @@
         }, 60000);
 
     };
-    // 停止洗牌，并抽选出球
-    const selectBall = () => {
-        // 清除定时器
+    // 停止洗牌
+    const stopShuffle = () => {
+        // 停止洗牌
         clearShuffleBallTime();
         clearStopShuffleBallTime();
-
-        // 抽选出球
-        let curIndex = 0;
-        if (raffleWay.value === "1") {
-            // 中间抽取
-            curIndex = Math.floor(curShuffleArr.value.length / 2);
-        } else if (raffleWay.value === "2") {
-            // 随机抽取
-            curIndex = Math.floor(Math.random() * curShuffleArr.value.length);
+        // 停止洗牌
+        isShuffleFlag.value = false;
+    };
+    // 抽选牌
+    const selectCards = (el: number) => {
+        
+        if (isShuffleFlag.value) {
+            // 洗牌中，禁止抽牌
+            return;
         }
-        // 存储当前取出的球索引下标
-        curShuffleIndex.value = curIndex;
-
-        selectedNumberArr.push(curShuffleArr.value[curIndex]);
-        /* // 去掉选中的，防止重复
-        // 为了给用户看到取到那个球，放在开始洗牌前处理
-        curShuffleArr.value.splice(curIndex, 1); */
+        console.log("el", el);
+        if (
+            (!selectBlueFlag.value && curSelectRedArr.value.includes(el))
+            || (selectBlueFlag.value && curSelectBlueArr.value.includes(el))
+        ) {
+            // 已选中的不能再点击
+            return;
+        }
+        if (
+            (!selectBlueFlag.value && curSelectRedArr.value.length >= Number(ballConfigInfoValue.redSeveralInput))
+            || (selectBlueFlag.value && curSelectBlueArr.value.length >= Number(ballConfigInfoValue.blueSeveralInput))
+        ) {
+            // 数量超了则不能继续选取
+            ElMessage({
+                message: "当前类型的球已选择完毕！",
+                type: "warning",
+            })
+            return;
+        }
+        // 选中的球存放到对应的容器中
+        if (selectBlueFlag.value) {
+            curSelectBlueArr.value.push(el);
+        } else {
+            curSelectRedArr.value.push(el);
+        }
+        // 当前轮次抽取的球
+        selectedNumberArr.push(el);
+        console.log("selectedNumberArr", selectedNumberArr);
 
         // 如果抽选的球数大于等于总数，则把当前的结果放入最终结果中
         if (selectedNumberArr.length >= (
@@ -304,75 +342,13 @@
             });
             viewFindlyArr.value.unshift([...selectedNumberArr1, ...selectedNumberArr2]);
         }
-
-        // 停止洗球
-        isShuffleFlag.value = false;
     };
 
-    // 快速抽选
-    const quickExtraction = () => {
-        handleBallArr();
-        selectedNumberArr = [];
-
-        let tempShuffleArr = [...redArr];
-        let tempRedArr = [];
-        for (let index = 0; index < ballConfigInfoValue.redSeveralInput; index++) {
-
-            let messyedRedArray = _.shuffle(tempShuffleArr);
-            // 抽选出球
-            let curIndex = 0;
-            if (raffleWay.value === "1") {
-                // 中间抽取
-                curIndex = Math.floor(messyedRedArray.length / 2);
-            } else if (raffleWay.value === "2") {
-                // 随机抽取
-                curIndex = Math.floor(Math.random() * messyedRedArray.length);
-            }
-            selectedNumberArr.push(messyedRedArray[curIndex]);
-            tempRedArr.push(messyedRedArray[curIndex]);
-
-            // 去掉选中的，防止重复
-            messyedRedArray.splice(curIndex, 1);
-            tempShuffleArr = messyedRedArray;
-        }
-        tempRedArr = tempRedArr.sort((a, b) => {
-            return a - b;
-        });
-
-        // 取蓝球
-        tempShuffleArr = [...blueArr];
-        let tempBlueArr = [];
-        for (let index = 0; index < ballConfigInfoValue.blueSeveralInput; index++) {
-
-            let messyedBlueArray = _.shuffle(tempShuffleArr);
-            // 抽选出球
-            let curIndex = 0;
-            if (raffleWay.value === "1") {
-                // 中间抽取
-                curIndex = Math.floor(messyedBlueArray.length / 2);
-            } else if (raffleWay.value === "2") {
-                // 随机抽取
-                curIndex = Math.floor(Math.random() * messyedBlueArray.length);
-            }
-            selectedNumberArr.push(messyedBlueArray[curIndex]);
-            tempBlueArr.push(messyedBlueArray[curIndex]);
-
-            // 去掉选中的，防止重复
-            messyedBlueArray.splice(curIndex, 1);
-            tempShuffleArr = messyedBlueArray;
-        }
-        tempBlueArr = tempBlueArr.sort((a, b) => {
-            return a - b;
-        });
-
-        viewFindlyArr.value.unshift([...tempRedArr, ...tempBlueArr]);
-    }
-
 </script>
-  
+
 <style scoped>
-    .raffle-view {
-        padding: 20px;
+    .playing-cards {
+        padding: 32rem;
     }
     .config-item {
         display: flex;
@@ -381,15 +357,28 @@
         flex-wrap: wrap;
         margin-top: 10px;
     }
-    .config-label {
-        flex: 1;
-        text-align: end;
+    .cards-box {
+        margin-top: 15rem;
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 10rem;
     }
-    .config-input {
-        flex: 1;
+    .card-item {
+        color: #fff;
+        height: 130rem;
+        font-size: 32rem;
+        border: 1px solid #808080;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
-    .input {
-        width: 100px;
+    .content-curlist {
+        margin-top: 10px;
+        height: 38px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
     }
 
     .content-mt_MYG2H {
@@ -424,10 +413,4 @@
         background-repeat: no-repeat;
         background-image: linear-gradient(180deg, #31CAF5 0%, #198CFF 100%);
     }
-    .circleall_1lvti.yellow_ball {
-        background-size: contain;
-        background-repeat: no-repeat;
-        background-image: linear-gradient(180deg, #31f53b 0%, #19ff3f 100%);
-    }
 </style>
-  

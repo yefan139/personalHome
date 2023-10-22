@@ -49,6 +49,11 @@ const router = createRouter({
         path: '/raffle',
         name: 'raffle',
         component: () => import('../views/RaffleView.vue')
+    },
+      {
+        path: '/raffle2',
+        name: 'raffle2',
+        component: () => import('../views/Raffle2View.vue')
     }
   ]
 })
