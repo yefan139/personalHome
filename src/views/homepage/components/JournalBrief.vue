@@ -6,7 +6,7 @@
             </div>
             <div style="padding: 15px">
                 <div>
-                    <div class="jour_new_title">深深的爱，淡淡的香</div>
+                    <div class="jour_new_title" @click="() => jumpEditor('1')">深深的爱，淡淡的香</div>
                     <p class="two_hidden_ellipsis jour_news_text">一朵花，皎洁，素雅，渐渐地演变成了一幅画，印在了记忆的长河里。那花，叶细长，翠翠的，花开时，伸出一只长长的颈，花儿在颈上绽开，花瓣不多，色浅浅的，似白玉般温润、玲珑，淡淡的香气从花蕊中溢出，香薰满屋，沁人肺腑，令人心广神怡，使人宁静安详。</p>
                 </div>
                 <div class="jour_news_time">2020-09-21</div>
@@ -31,7 +31,16 @@
 </template>
 
 <script setup lang="ts">
+    import {useRouter} from "vue-router";
+
+    const router = useRouter();
+
     const assetsUrl = window.assetsUrl; // 服务静态资源路径
+    // 跳转到编辑页
+    const jumpEditor = (id: string) => {
+        console.log("id", id);
+        router.push(`/editor`)
+    };
 </script>
 
 <style scoped>

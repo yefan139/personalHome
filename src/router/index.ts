@@ -1,9 +1,10 @@
-import { createRouter, createWebHistory, createWebHashHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import NotFound from '../views/NotFound.vue'
 import Developing from '../views/Developing.vue'
 import HomeCenter from '../views/homepage/HomeCenter.vue'
-import Profile from '../views/homepage/Profile.vue'
+import Editor from "../views/Editor.vue"
+// import Profile from '../views/homepage/Profile.vue'
 
 const router = createRouter({
 //   history: createWebHistory(import.meta.env.BASE_URL),
@@ -44,6 +45,11 @@ const router = createRouter({
             }
             
         ]
+    },
+    {
+        name: 'editor',
+        path: '/editor',
+        component: Editor,
     },
     {
         path: '/raffle',
