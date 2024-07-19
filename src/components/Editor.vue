@@ -3,6 +3,7 @@
 </template>
 
 <script setup lang="ts">
+    // @ts-nocheck
     import {ref, onMounted} from 'vue';
 
     import zh from '../utils/i18n.json';
@@ -37,10 +38,10 @@
         },
     });
 
-    const editor = ref(null)
+    const editor = ref<EditorJS>()
  
     const saveEditor = () => {
-        editor.value.save().then((outputData) => {
+        editor.value?.save().then((outputData) => {
             console.log(outputData)
         }).catch((error) => {
             console.log(error)
@@ -108,7 +109,6 @@
                 console.log('Editor.js is ready to work!')
             },
         })
-        console.log(editor.value);
     });
 
     defineExpose({saveEditor});

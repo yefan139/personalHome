@@ -10,9 +10,10 @@ export function isMobile() {
             break
         }
     }
-    if (window.innerHeight <= 768) {
-        // 当前设备是移动端
-        mobileFlag = true;
-    }
+
+    // if (window.innerHeight <= 768) {
+    //     // 当前设备是移动端
+    //     mobileFlag = true;
+    // }
     return mobileFlag;
 }

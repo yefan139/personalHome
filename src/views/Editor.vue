@@ -1,7 +1,7 @@
 <template>
     <div style="padding: 50px 0;">
         <div class="editorBox">
-            <editorJs ref="editorRef" :width="700" :height="710" v-model="data"></editorJs>
+            <EditorJs ref="editorRef" :width="700" :height="710" v-model="data"></EditorJs>
             <el-button @click="save">保存</el-button>
         </div>
     </div>
@@ -9,15 +9,15 @@
 
 <script setup lang="ts">
     import {reactive, ref, toRefs} from 'vue';
-    import editorJs from '../components/Editor.vue';
+    import EditorJs from '../components/Editor.vue';
     const {data} = toRefs(reactive({
         //定义数组和对象
         data: ''
     }));
-    const editorRef = ref(null); //定义普通类型
+    const editorRef = ref<InstanceType<typeof EditorJs> | null>(null); //定义普通类型
     // 保存
     const save = () => {
-        editorRef.value.saveEditor()
+        editorRef.value?.saveEditor()
     };
 
 </script>
